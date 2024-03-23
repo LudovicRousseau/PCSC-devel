@@ -27,6 +27,7 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+#include "config.h"
 #include "misc.h"
 #include <winscard.h>
 #include "sys_generic.h"
@@ -286,7 +287,7 @@ static void spy_readerstate(SCARD_READERSTATE * rgReaderStates, int cReaders)
 static LONG load_lib(void)
 {
 
-#define LIBPCSC "libpcsclite_real.so.1"
+#define LIBPCSC LIBDIR "/libpcsclite_real.so.1"
 
 	const char *lib;
 
