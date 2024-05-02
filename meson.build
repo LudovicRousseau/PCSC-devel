@@ -17,6 +17,7 @@ conf_data = configuration_data({
   'VERSION' : '"' + meson.project_version() + '"',
   'PCSCLITE_HP_DROPDIR' : '"' + get_option('usbdropdir') + '"',
   'HAVE_NANOSLEEP' : true,
+  'NO_LOG' : get_option('embedded'),
   })
 # for generated files from .in templates
 confgen_data = configuration_data({
