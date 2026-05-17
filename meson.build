@@ -42,6 +42,9 @@ endif
 if compiler.has_function('getopt_long')
   conf_data.set('HAVE_GETOPT_LONG', true)
 endif
+if compiler.has_member('struct dirent', 'd_type', prefix : '#include <dirent.h>')
+  conf_data.set('HAVE_STRUCT_DIRENT_D_TYPE', true)
+endif
 
 # tests for options
 features = []
