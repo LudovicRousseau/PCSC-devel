@@ -100,6 +100,7 @@ incdir = include_directories(['src', 'src/PCSC'])
 # dependencies
 threads_dep = dependency('threads')
 pcscd_dep = [threads_dep]
+libpcsclite_dep = [threads_dep]
 if get_option('libudev')
   udev_dep = dependency('libudev')
   pcscd_dep += udev_dep
@@ -121,6 +122,7 @@ cc = meson.get_compiler('c')
 dl_deps = cc.find_library('dl', required: false)
 
 pcscd_dep += dl_deps
+libpcsclite_dep += dl_deps
 
 if get_option('polkit')
   polkit_dep = dependency('polkit-gobject-1')
@@ -143,6 +145,20 @@ if get_option('libsystemd')
 else
   systemdsystemunitdir = get_option('prefix') / 'lib' / 'systemd' / systemdunit
   sysusersdir = get_option('prefix') / 'sysusers.d'
+endif
+
+if not compiler.has_function('socket')
+  libsocket = compiler.find_library('socket', required: false)
+  libnetwork = compiler.find_library('network', required: false)
+  if compiler.has_function('socket', dependencies: libsocket)
+    pcscd_dep += libsocket
+    libpcsclite_dep += libsocket
+  elif compiler.has_function('socket', dependencies: libnetwork)
+    pcscd_dep += libnetwork
+    libpcsclite_dep += libnetwork
+  else
+    error('Could not find right library for socket()')
+  endif
 endif
 
 # architecture
@@ -193,7 +209,7 @@ libpcsclite_src = [
 if get_option('default_library') != 'static'
   libpcsclite = shared_library('pcsclite',
     libpcsclite_src,
-    dependencies : [dl_deps, threads_dep],
+    dependencies : libpcsclite_dep,
     include_directories : incdir,
     soversion : 1,
     install : true)
@@ -201,7 +217,7 @@ if get_option('default_library') != 'static'
   shared_library('pcsclite_real',
     libpcsclite_real_src,
     include_directories : incdir,
-    dependencies : threads_dep,
+    dependencies : libpcsclite_dep,
     c_args: '-DLIBPCSCLITE -DSIMCLIST_NO_DUMPRESTORE',
     soversion : 1,
     install : true)
@@ -209,7 +225,7 @@ if get_option('default_library') != 'static'
   # libpcscspy library
   library('pcscspy',
     sources : ['src/spy/libpcscspy.c', 'src/sys_unix.c'],
-    dependencies : [dl_deps, threads_dep],
+    dependencies : libpcsclite_dep,
     include_directories : incdir,
     soversion : 0,
     install : true)
