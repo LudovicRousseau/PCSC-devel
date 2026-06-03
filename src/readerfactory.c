@@ -478,9 +478,9 @@ LONG RFAddReader(const char *readerNameLong, int port, const char *library,
 
 		if (i == pcsclite_max_reader_context)
 		{
-			/* No more slot left return */
-			RFRemoveReader(readerName, port, REMOVE_READER_NO_FLAG);
-			return SCARD_E_NO_MEMORY;
+			/* No more slot left */
+			RFReAllocateReaderSpace();
+			dwContextB = i;
 		}
 
 		/* Copy the previous reader name and increment the slot number */
