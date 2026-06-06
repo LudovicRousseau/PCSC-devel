@@ -38,6 +38,16 @@ if compiler.has_function('getrandom', prefix : '#include <sys/random.h>')
 endif
 if compiler.has_function('secure_getenv')
   conf_data.set('HAVE_SECURE_GETENV', true)
+else
+  if not compiler.has_function('issetugid')
+    libbsd = compiler.find_library('bsd', required: false)
+    if compiler.has_function('issetugid', dependencies: libbsd)
+      pcscd_dep += libbsd
+      libpcsclite_dep += libbsd
+    else
+      error('Could not find right library for issetugid()')
+    endif
+  endif
 endif
 if compiler.has_function('getopt_long')
   conf_data.set('HAVE_GETOPT_LONG', true)
@@ -158,16 +168,6 @@ if not compiler.has_function('socket')
     libpcsclite_dep += libnetwork
   else
     error('Could not find right library for socket()')
-  endif
-endif
-
-if not compiler.has_function('issetugid')
-  libbsd = compiler.find_library('bsd', required: false)
-  if compiler.has_function('issetugid', dependencies: libbsd)
-    pcscd_dep += libbsd
-    libpcsclite_dep += libbsd
-  else
-    error('Could not find right library for issetugid()')
   endif
 endif
 
