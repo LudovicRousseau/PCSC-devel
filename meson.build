@@ -161,6 +161,16 @@ if not compiler.has_function('socket')
   endif
 endif
 
+if not compiler.has_function('issetugid')
+  libbsd = compiler.find_library('bsd', required: false)
+  if compiler.has_function('issetugid', dependencies: libbsd)
+    pcscd_dep += libbsd
+    libpcsclite_dep += libbsd
+  else
+    error('Could not find right library for issetugid()')
+  endif
+endif
+
 # architecture
 r = run_command('uname', check: true)
 pcsc_arch = r.stdout().strip()
