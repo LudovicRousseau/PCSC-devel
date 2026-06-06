@@ -36,19 +36,6 @@ compiler = meson.get_compiler('c')
 if compiler.has_function('getrandom', prefix : '#include <sys/random.h>')
   conf_data.set('HAVE_GETRANDOM', true)
 endif
-if compiler.has_function('secure_getenv')
-  conf_data.set('HAVE_SECURE_GETENV', true)
-else
-  if not compiler.has_function('issetugid')
-    libbsd = compiler.find_library('bsd', required: false)
-    if compiler.has_function('issetugid', dependencies: libbsd)
-      pcscd_dep += libbsd
-      libpcsclite_dep += libbsd
-    else
-      error('Could not find right library for issetugid()')
-    endif
-  endif
-endif
 if compiler.has_function('getopt_long')
   conf_data.set('HAVE_GETOPT_LONG', true)
 endif
@@ -116,6 +103,20 @@ if get_option('libudev')
   pcscd_dep += udev_dep
   conf_data.set('HAVE_LIBUDEV', true)
   features += 'libudev'
+endif
+
+if compiler.has_function('secure_getenv')
+  conf_data.set('HAVE_SECURE_GETENV', true)
+else
+  if not compiler.has_function('issetugid')
+    libbsd = compiler.find_library('bsd', required: false)
+    if compiler.has_function('issetugid', dependencies: libbsd)
+      pcscd_dep += libbsd
+      libpcsclite_dep += libbsd
+    else
+      error('Could not find right library for issetugid()')
+    endif
+  endif
 endif
 
 if get_option('libusb')
