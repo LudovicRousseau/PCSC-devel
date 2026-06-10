@@ -1,3 +1,8 @@
+2.5.1: Ludovic Rousseau
+10 June 2026
+- Fix a bug (introduced in 2.5.0) with multi-slots readers
+- Add support of Haiku Operating System
+
 2.5.0: Ludovic Rousseau
 27 May 2026
 - Do not limit to 16 readers only
