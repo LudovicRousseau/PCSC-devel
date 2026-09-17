@@ -67,6 +67,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 	LONG RFAllocateReaderSpace(unsigned int);
 	LONG RFAddReader(const char *, int, const char *, const char *);
+	void RFRemoveReaderByContext(READER_CONTEXT * rContext, int flags);
 	LONG RFRemoveReader(const char *, int, int);
 	LONG RFSetReaderName(READER_CONTEXT *, const char *, const char *, int);
 	LONG RFReaderInfo(const char *, /*@out@*/ struct ReaderContext **);

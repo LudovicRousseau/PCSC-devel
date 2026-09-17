@@ -600,6 +600,37 @@ LONG RFAddReader(const char *readerNameLong, int port, const char *library,
 	return SCARD_S_SUCCESS;
 }
 
+void RFRemoveReaderByContext(READER_CONTEXT * rContext, int flags)
+{
+	/* tell the driver that the reader has been removed */
+	if (flags & REMOVE_READER_FLAG_REMOVED)
+	{
+		UCHAR tagValue[1];
+		DWORD valueLength;
+		LONG ret;
+
+		/* signal to the driver that the reader has been removed */
+		valueLength = sizeof(tagValue);
+		ret = IFDGetCapabilities(rContext,
+				TAG_IFD_DEVICE_REMOVED, &valueLength, tagValue);
+		if ((IFD_SUCCESS) == ret && (1 == tagValue[0]))
+		{
+			tagValue[0] = 1;
+			IFDSetCapabilities(rContext,
+				TAG_IFD_DEVICE_REMOVED, sizeof tagValue, tagValue);
+		}
+	}
+
+	/* remove the reader */
+	UNREF_READER(rContext)
+
+	/* we have one less reader */
+	ReaderEvents++;
+	/* wrap? */
+	if (ReaderEvents < 0)
+		ReaderEvents = 1;
+}
+
 LONG RFRemoveReader(const char *readerName, int port, int flags)
 {
 	char lpcStripReader[MAX_READERNAME];
@@ -631,35 +662,10 @@ LONG RFRemoveReader(const char *readerName, int port, int flags)
 			if ((strncmp(readerName, lpcStripReader, MAX_READERNAME - sizeof(" 00 00")) == 0)
 				&& (port == sReadersContexts[i]->port))
 			{
-				if (flags & REMOVE_READER_FLAG_REMOVED)
-				{
-					UCHAR tagValue[1];
-					DWORD valueLength;
-					LONG ret;
-
-					/* signal to the driver that the reader has been removed */
-					valueLength = sizeof(tagValue);
-					ret = IFDGetCapabilities(sReadersContexts[i],
-						TAG_IFD_DEVICE_REMOVED, &valueLength, tagValue);
-					if ((IFD_SUCCESS) == ret && (1 == tagValue[0]))
-					{
-						tagValue[0] = 1;
-						IFDSetCapabilities(sReadersContexts[i],
-							TAG_IFD_DEVICE_REMOVED, sizeof tagValue, tagValue);
-					}
-				}
-
-				/* remove the reader */
-				UNREF_READER(sReadersContexts[i])
+				RFRemoveReaderByContext(sReadersContexts[i], flags);
 			}
 		}
 	}
-
-	/* we have one less reader */
-	ReaderEvents++;
-	/* wrap? */
-	if (ReaderEvents < 0)
-		ReaderEvents = 1;
 
 	return SCARD_S_SUCCESS;
 }
