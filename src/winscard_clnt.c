@@ -486,9 +486,21 @@ end:
 	return rv;
 }
 
+static typeof(my_redirect_reset)* _my_redirect_reset = NULL;
+
+PCSC_API void my_pcsc_init(void (f)(void))
+{
+	/* set reset callback */
+	_my_redirect_reset = f;
+}
+
 #ifdef DESTRUCTOR
 DESTRUCTOR static void destructor(void)
 {
+	/* reset libredirect if available */
+	if (_my_redirect_reset)
+		_my_redirect_reset();
+
 	(void)pthread_mutex_lock(&contextMapList_lock);
 	list_destroy(&contextMapList);
 	(void)pthread_mutex_unlock(&contextMapList_lock);

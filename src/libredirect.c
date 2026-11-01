@@ -105,6 +105,29 @@ static struct
 	DLSYM_SET_VALUE(SCardGetAttrib),
 	DLSYM_SET_VALUE(SCardSetAttrib)
 };
+
+void my_redirect_reset(void)
+{
+	redirect DLSYM_SET_VALUE(SCardEstablishContext);
+	redirect DLSYM_SET_VALUE(SCardReleaseContext);
+	redirect DLSYM_SET_VALUE(SCardIsValidContext);
+	redirect DLSYM_SET_VALUE(SCardConnect);
+	redirect DLSYM_SET_VALUE(SCardReconnect);
+	redirect DLSYM_SET_VALUE(SCardDisconnect);
+	redirect DLSYM_SET_VALUE(SCardBeginTransaction);
+	redirect DLSYM_SET_VALUE(SCardEndTransaction);
+	redirect DLSYM_SET_VALUE(SCardStatus);
+	redirect DLSYM_SET_VALUE(SCardGetStatusChange);
+	redirect DLSYM_SET_VALUE(SCardControl);
+	redirect DLSYM_SET_VALUE(SCardTransmit);
+	redirect DLSYM_SET_VALUE(SCardListReaderGroups);
+	redirect DLSYM_SET_VALUE(SCardListReaders);
+	redirect DLSYM_SET_VALUE(SCardFreeMemory);
+	redirect DLSYM_SET_VALUE(SCardCancel);
+	redirect DLSYM_SET_VALUE(SCardGetAttrib);
+	redirect DLSYM_SET_VALUE(SCardSetAttrib);
+}
+
 #pragma GCC diagnostic pop
 
 static void *Lib_handle = NULL;
@@ -169,6 +192,13 @@ static void load_lib(void)
 	get_symbol(SCardCancel);
 	get_symbol(SCardGetAttrib);
 	get_symbol(SCardSetAttrib);
+
+	typeof(my_pcsc_init)* _my_pcsc_init;
+
+	_my_pcsc_init = dlsym(Lib_handle, "my_pcsc_init");
+	/* the symbol may not exit if LIBPCSCLITE_DELEGATE is used */
+	if (_my_pcsc_init)
+		_my_pcsc_init(my_redirect_reset);
 }
 
 /* exported functions */

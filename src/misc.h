@@ -76,6 +76,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
+void my_pcsc_init(void (f)(void));
+void my_redirect_reset(void);
+
 #ifndef min
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
