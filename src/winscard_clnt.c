@@ -489,6 +489,8 @@ end:
 #ifdef DESTRUCTOR
 DESTRUCTOR static void destructor(void)
 {
+	isExecuted = false;
+
 	(void)pthread_mutex_lock(&contextMapList_lock);
 	list_destroy(&contextMapList);
 	(void)pthread_mutex_unlock(&contextMapList_lock);
@@ -3221,6 +3223,12 @@ LONG SCardCancel(SCARDCONTEXT hContext)
 
 	PROFILE_START
 	API_TRACE_IN("%ld", hContext)
+
+	if (!isExecuted)
+	{
+		rv = SCARD_E_NO_SERVICE;
+		goto error;
+	}
 
 	/*
 	 * Make sure this context has been opened
